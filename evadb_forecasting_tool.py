@@ -7,6 +7,7 @@ import pandas
 import evadb
 
 class EvaDBForecastingInput(BaseModel):
+    csv_file_path: str = Field(..., description="The path to the CSV file containing the dataset")
     time_col_name: str = Field(..., description="The name of the CSV column that contains the datestamp")
     forecasted_col_name: str = Field(..., description="The name of the CSV column we wish to forecast")
     horizon: str = Field(..., description="The number of steps we want to forecast in the future")
@@ -20,11 +21,9 @@ class EvaDBForecastingTool(BaseTool):
     args_schema: Type[BaseModel] = EvaDBForecastingInput
     description: str = "Forecast a time series dataset"
 
-    def _execute(self, time_col_name: str, forecasted_col_name: str, horizon: str):
-        csv_file_name = 'stocks.csv'
-
+    def _execute(self, csv_file_path: str, time_col_name: str, forecasted_col_name: str, horizon: str):
         conn = sqlite3.connect('sqlite.db')
-        df = pandas.read_csv(csv_file_name)
+        df = pandas.read_csv(csv_file_path)
         df.to_sql('data', conn, if_exists='replace')
 
         cursor = evadb.connect().cursor()
